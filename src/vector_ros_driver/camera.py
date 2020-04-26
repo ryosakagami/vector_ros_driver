@@ -10,7 +10,7 @@ import yaml
 from sensor_msgs.msg import Image, CameraInfo
 
 class Camera(object):
-    def __init__(self, async_robot, publish_rate=10, image_frame_id='camera_link'):
+    def __init__(self, async_robot, publish_rate=30, image_frame_id='camera_link'):
         self.async_robot = async_robot
         self.rate = rospy.Rate(publish_rate)
         self.image_frame_id = image_frame_id
