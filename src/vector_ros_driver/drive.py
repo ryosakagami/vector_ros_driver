@@ -42,10 +42,10 @@ class Drive(object):
         rwheel_ticks_total = 0
 
         while not rospy.is_shutdown():
-            if self.async_robot.left_wheel_speed_mmps > 0:
+            if abs(self.async_robot.left_wheel_speed_mmps) > 0:
                 lwheel_ticks_total += self.async_robot.left_wheel_speed_mmps / self.publish_rate
 
-            if self.async_robot.right_wheel_speed_mmps > 0:
+            if abs(self.async_robot.right_wheel_speed_mmps) > 0:
                 rwheel_ticks_total += self.async_robot.right_wheel_speed_mmps / self.publish_rate
 
             # publish number of estimated ticks for each wheel in ratio of 1000 ticks per meter
