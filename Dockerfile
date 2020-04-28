@@ -52,6 +52,9 @@ RUN git clone https://github.com/betab0t/vector_ros /catkin_ws/src/vector_ros
 # clone diff_drive package
 RUN git clone https://github.com/merose/diff_drive /catkin_ws/src/diff_drive
 
+# clone grid_map package
+RUN git clone https://github.com/ANYbotics/grid_map.git /catkin_ws/src/grid_map
+
 # build all packages in catkin_ws
 RUN cd /catkin_ws && \
     /ros_entrypoint.sh catkin_make

@@ -12,6 +12,7 @@ from vector_ros_driver.drive import Drive
 from vector_ros_driver.camera import Camera
 from vector_ros_driver.behavior import Behavior
 from vector_ros_driver.tf import JointStatesPublisher
+from vector_ros_driver.nav_map import NavMap
 
 if __name__=="__main__":
     rospy.init_node("vector")
@@ -26,6 +27,7 @@ if __name__=="__main__":
     else:
         async_robot = anki_vector.AsyncRobot()
         async_robot.camera.init_camera_feed()
+        async_robot.nav_map.init_nav_map_feed()
 
     # connect to Vector
     async_robot.connect()
@@ -44,5 +46,7 @@ if __name__=="__main__":
 
     tf_thread = threading.Thread(target=JointStatesPublisher, args=(async_robot,))
     tf_thread.start()
+
+    nav_map_thread = threading.Thread(target=NavMap, args=(async_robot,))
 
     rospy.spin()

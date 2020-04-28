@@ -23,13 +23,13 @@
     </node>
 
     <node name="controller" pkg="diff_drive" type="diff_drive_controller" output="screen">
-    <rosparam subst_value="true">
-      ticks_per_meter: $(arg ticks_per_meter)
-      wheel_separation: $(arg wheel_separation)
-      max_motor_speed: 3000
-      timeout: 1.0
-    </rosparam>
-    <remap from="cmd_vel" to="/vector/cmd_vel" />
+        <rosparam subst_value="true">
+        ticks_per_meter: $(arg ticks_per_meter)
+        wheel_separation: $(arg wheel_separation)
+        max_motor_speed: 3000
+        timeout: 1.0
+        </rosparam>
+        <remap from="cmd_vel" to="/vector/cmd_vel" />
     </node>
 
     <node name="odom_publisher" pkg="diff_drive" type="diff_drive_odometry" output="screen">
