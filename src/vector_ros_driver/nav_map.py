@@ -56,6 +56,39 @@ class NavMap(object):
         data.data = [NavNodeContentTypes.Unknown]*9
 
         # Fill in data
+        # TODO: implement here, borrowing codes from vector sdk
+        """
+        def _recursive_draw(grid_node: nav_map.NavMapGridNode):
+            if grid_node.children is not None:
+                for child in grid_node.children:
+                    _recursive_draw(child)
+            else:
+                # leaf node - render as a quad
+                map_alpha = 0.5
+                cen = grid_node.center
+                half_size = grid_node.size * 0.5
+
+                # Draw outline
+                glColor4f(*color_light_gray, 1.0)  # fully opaque
+                glBegin(GL_LINE_STRIP)
+                glVertex3f(cen.x + half_size, cen.y + half_size, cen.z)
+                glVertex3f(cen.x + half_size, cen.y - half_size, cen.z)
+                glVertex3f(cen.x - half_size, cen.y - half_size, cen.z)
+                glVertex3f(cen.x - half_size, cen.y + half_size, cen.z)
+                glVertex3f(cen.x + half_size, cen.y + half_size, cen.z)
+                glEnd()
+
+                # Draw filled contents
+                glColor4f(*color_for_content(grid_node.content), map_alpha)
+                glBegin(GL_TRIANGLE_STRIP)
+                glVertex3f(cen.x + half_size, cen.y - half_size, fill_z)
+                glVertex3f(cen.x + half_size, cen.y + half_size, fill_z)
+                glVertex3f(cen.x - half_size, cen.y - half_size, fill_z)
+                glVertex3f(cen.x - half_size, cen.y + half_size, fill_z)
+                glEnd()
+
+        _recursive_draw(new_nav_map.root_node)
+        """
         dstride0 = data.layout.dim[0].stride
         dstride1 = data.layout.dim[1].stride
         offset = data.layout.data_offset
