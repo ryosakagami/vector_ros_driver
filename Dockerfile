@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     ros-melodic-tf \
     ros-melodic-xacro \
     ros-melodic-robot-state-publisher \
-    ros-melodic-joint-state-publisher
+    ros-melodic-joint-state-publisher \
+    ros-melodic-cv-bridge \
+    ros-melodic-vision-opencv
 
 RUN pip3 install \
     rospkg \
