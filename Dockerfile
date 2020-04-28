@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y \
     ros-melodic-xacro \
     ros-melodic-robot-state-publisher \
     ros-melodic-joint-state-publisher \
-    ros-melodic-cv-bridge \
-    ros-melodic-vision-opencv
+    ros-melodic-grid-map
 
 RUN pip3 install \
     rospkg \
@@ -53,9 +52,6 @@ RUN git clone https://github.com/betab0t/vector_ros /catkin_ws/src/vector_ros
 
 # clone diff_drive package
 RUN git clone https://github.com/merose/diff_drive /catkin_ws/src/diff_drive
-
-# clone grid_map package
-RUN git clone https://github.com/ANYbotics/grid_map.git /catkin_ws/src/grid_map
 
 # build all packages in catkin_ws
 RUN cd /catkin_ws && \
