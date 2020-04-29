@@ -25,9 +25,9 @@ if __name__=="__main__":
         async_robot = mock_robot.MockRobot()
 
     else:
-        async_robot = anki_vector.AsyncRobot()
-        async_robot.camera.init_camera_feed()
-        async_robot.nav_map.init_nav_map_feed()
+        with anki_vector.AsyncRobot() as async_robot:
+            async_robot.camera.init_camera_feed()
+            async_robot.nav_map.init_nav_map_feed()
 
     # connect to Vector
     async_robot.connect()
@@ -48,5 +48,6 @@ if __name__=="__main__":
     tf_thread.start()
 
     nav_map_thread = threading.Thread(target=NavMap, args=(async_robot,))
+    nav_map_thread.start()
 
     rospy.spin()
