@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip3 install \
     rospkg \
-    catkin_pkg
+    catkin_pkg \
     opencv-python
 
 # install up-to-date rosunit so we'll get the patch for Python3
