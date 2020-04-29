@@ -63,3 +63,5 @@ COPY vector_entrypoint.sh /vector_entrypoint.sh
 ENTRYPOINT ["/vector_entrypoint.sh"]
 
 CMD ["roslaunch", "vector_ros_driver", "driver.launch"]
+# publishers.launch should be started manually
+# after initialization of driver is ready
