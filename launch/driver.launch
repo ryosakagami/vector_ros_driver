@@ -1,8 +1,0 @@
-<launch>
-    <node pkg="vector_ros_driver" type="vector_node.py" name="vector" output="screen">
-        <remap from="~lwheel_desired_rate" to="lwheel_desired_rate" />
-        <remap from="~rwheel_desired_rate" to="rwheel_desired_rate" />
-        <remap from="~lwheel_ticks" to="lwheel_ticks" />
-        <remap from="~rwheel_ticks" to="rwheel_ticks" />
-    </node>
-</launch>
