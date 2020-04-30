@@ -34,6 +34,7 @@ class NavMap(object):
                 print(e)
                 print("Early return and retry after sleeping...")
                 self.rate.sleep()
+                continue
 
             grid_map = self.nav_map_grid_to_grid_map(latest_nav_map)
             self.grid_map_publisher.publish(grid_map)
@@ -61,8 +62,8 @@ class NavMap(object):
         data = Float32MultiArray()
         data.layout.dim.append(MultiArrayDimension())
         data.layout.dim.append(MultiArrayDimension())
-        data.layout.dim[0].label = "height"
-        data.layout.dim[1].label = "width"
+        data.layout.dim[0].label = "column_index"  # height
+        data.layout.dim[1].label = "row_index"  # width
         height = int(grid_map.info.length_y / grid_map.info.resolution)
         width = int(grid_map.info.length_x / grid_map.info.resolution)
         data.layout.dim[0].size = height
