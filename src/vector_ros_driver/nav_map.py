@@ -13,14 +13,31 @@ from grid_map_msgs.msg import GridMap
 
 
 class NavMap(object):
-    def __init__(self, async_robot):
+    def __init__(self, async_robot, publish_rate=1):
         self.async_robot = async_robot
+        self.rate = rospy.Rate(publish_rate)
 
         # Publishers
         self.grid_map_publisher = rospy.Publisher("~grid_map", GridMap, queue_size=1)
 
         # Subscribers
-        self.async_robot.events.subscribe(self._on_nav_map_update, Events.nav_map_update)
+        # self.async_robot.events.subscribe(self._on_nav_map_update, Events.nav_map_update)
+
+        # Start publishing NavMap topic
+        self.publish_nav_map()
+
+    def publish_nav_map(self):
+        while not rospy.is_shutdown():
+            try:
+                latest_nav_map = self.async_robot.nav_map.latest_nav_map
+            except anki_vector.exceptions.VectorPropertyValueNotReadyException as e:
+                print(e)
+                print("Early return and retry after sleeping...")
+                self.rate.sleep()
+
+            grid_map = self.nav_map_grid_to_grid_map(latest_nav_map)
+            self.grid_map_publisher.publish(grid_map)
+            self.rate.sleep()
 
     def _on_nav_map_update(self, _robot, _event_type, msg):
         grid_map = self.nav_map_grid_to_grid_map(msg)
@@ -53,7 +70,7 @@ class NavMap(object):
         data.layout.dim[0].stride = height * width
         data.layout.dim[1].stride = width
         data.layout.data_offset = 0
-        data.data = [NavNodeContentTypes.Unknown]*9
+        data.data = [NavNodeContentTypes.Unknown] * height * width
 
         # Fill in data
         # TODO: implement here, borrowing codes from vector sdk
@@ -97,7 +114,7 @@ class NavMap(object):
             for j in range(width):
                 num = random.randrange(0,8)
                 data.data[offset + i + dstride1*j] = num
-                tmpmat[i,j] = num
+                tmpmat[i, j] = num
         grid_map.data.append(data)
 
         # Return grid map
