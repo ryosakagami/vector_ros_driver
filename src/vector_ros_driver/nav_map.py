@@ -95,7 +95,7 @@ class NavMap(object):
         tmpmat = np.zeros((height, width))
         for i in range(height):
             for j in range(width):
-                num = random.randrange(0,10)
+                num = random.randrange(0,8)
                 data.data[offset + i + dstride1*j] = num
                 tmpmat[i,j] = num
         grid_map.data.append(data)
