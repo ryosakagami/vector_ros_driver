@@ -16,9 +16,6 @@ from vector_ros_driver.nav_map import NavMap
 
 
 def main(async_robot):
-    # connect to Vector
-    async_robot.connect()
-
     # start all using shared AsyncRobot object
     Vector(async_robot)
     Animation(async_robot)
