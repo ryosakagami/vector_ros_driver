@@ -48,9 +48,17 @@ class Camera(object):
 
     def publish_camera_feed(self):
 
-
         while not rospy.is_shutdown():
-            image = self.bridge.cv2_to_imgmsg(numpy.asarray(self.async_robot.camera.latest_image), encoding="rgb8") # convert PIL.Image to ROS Image
+            pil_image = self.async_robot.camera.latest_image.raw_image.convert('RGB')
+            cv_image = numpy.array(pil_image)
+            cv_image = cv_image[:, :, ::-1].copy()
+            try:
+                image = self.bridge.cv2_to_imgmsg(cv_image, "bgr8")
+            except cv_bridge.CvBridgeError as e:
+                print(e)
+                self.rate.sleep()
+                return
+
             self.camera_info.header.stamp = rospy.Time.now()
             image.header.stamp = rospy.Time.now()
             image.header.frame_id = self.image_frame_id
