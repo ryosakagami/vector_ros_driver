@@ -26,6 +26,16 @@ class NavMap(object):
         # Start publishing NavMap topic
         self.publish_nav_map()
 
+    # This function is attributed to
+    # https://github.com/neka-nat/ros_np_multiarray/blob/master/src/ros_np_multiarray/ros_np_multiarray.py
+    def _numpy_to_multiarray(self, np_array):
+        multiarray = Float32MultiArray()
+        multiarray.layout.dim = [MultiArrayDimension('dim%d' % i,
+                                                    np_array.shape[i],
+                                                    np_array.shape[i] * np_array.dtype.itemsize) for i in range(np_array.ndim)]
+        multiarray.data = np_array.reshape([1, -1])[0].tolist()
+        return multiarray
+
     def publish_nav_map(self):
         while not rospy.is_shutdown():
             try:
@@ -54,49 +64,30 @@ class NavMap(object):
         grid_map.info.pose.position.y = nav_map_grid.center.y / 1000.
         grid_map.info.pose.position.z = nav_map_grid.center.z / 1000.
 
-        # Data initialization
-        data = Float32MultiArray()
-        data.layout.dim.append(MultiArrayDimension())
-        data.layout.dim.append(MultiArrayDimension())
-        data.layout.dim[0].label = "column_index"  # width
-        data.layout.dim[1].label = "row_index"  # height
         height = int(grid_map.info.length_x / grid_map.info.resolution)
         width = int(grid_map.info.length_y / grid_map.info.resolution)
-        data.layout.dim[0].size = width
-        data.layout.dim[1].size = height
-        data.layout.dim[0].stride = height * width
-        data.layout.dim[1].stride = height
-        data.layout.data_offset = 0
-        data.data = [NavNodeContentTypes.Unknown] * height * width
-
-        # Fill in data
-        dstride0 = data.layout.dim[0].stride
-        dstride1 = data.layout.dim[1].stride
-        offset = data.layout.data_offset
 
         def _index_to_pose(row_ix, col_ix):
             x = nav_map_grid.center.x - nav_map_grid.size + row_ix * grid_map.info.resolution * 1000  # unit: mm
-            y = nav_map_grid.center.x + nav_map_grid.size - row_ix * grid_map.info.resolution * 1000  # unit: mm
+            y = nav_map_grid.center.y + nav_map_grid.size - col_ix * grid_map.info.resolution * 1000  # unit: mm
             return x, y  # unit: mm
 
-        # tmpmat = np.zeros((height, width))
-        # for i in range(height):
-        #     for j in range(width):
-        #         # x, y = _index_to_pose(i, j)
-        #         # num = nav_map_grid.get_content(x, y)
-        #         # data.data[offset + i + dstride1*j] = float(num.value)
-        #         # tmpmat[i, j] = float(num.value)
-        #         num = random.randrange(0,8)
-        #         data.data[offset + i + dstride1*j] = num
-        #         tmpmat[i, j] = num
-
-        # Dummy data for test
-        tmpmat = np.zeros((height, width))
+        np_array = np.zeros((height, width))
         for i in range(height):
             for j in range(width):
-                num = random.randrange(0,8)
-                data.data[offset + i + dstride1 * j] = num
-                tmpmat[i, j] = num
+                x, y = _index_to_pose(i, j)
+                num = nav_map_grid.get_content(x, y)
+                if type(num) == int:
+                    value = float(num)
+                else:
+                    value = float(num.value)
+                # np_array[i, j] = float(value)
+                np_array[i, j] = float(i)
+        # for some reason, if we set row_index to dim[0].label, visualizer complains.
+        # thus, we first transpose np_array
+        data = self._numpy_to_multiarray(np_array.transpose())
+        data.layout.dim[0].label = "column_index"
+        data.layout.dim[1].label = "row_index"
 
         grid_map.data.append(data)
 
