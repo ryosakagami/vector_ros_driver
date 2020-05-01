@@ -56,7 +56,7 @@ class NavMap(object):
 
         # GridMapInfo
         grid_map.info.header.stamp = rospy.Time.now()
-        grid_map.info.header.frame_id = 'base_link'
+        grid_map.info.header.frame_id = 'odom'
         grid_map.info.resolution = 0.01  # 10mm / cell
         grid_map.info.length_x = nav_map_grid.size / 1000.
         grid_map.info.length_y = nav_map_grid.size / 1000.
@@ -68,8 +68,8 @@ class NavMap(object):
         width = int(grid_map.info.length_y / grid_map.info.resolution)
 
         def _index_to_pose(row_ix, col_ix):
-            x = nav_map_grid.center.x - nav_map_grid.size + row_ix * grid_map.info.resolution * 1000  # unit: mm
-            y = nav_map_grid.center.y + nav_map_grid.size - col_ix * grid_map.info.resolution * 1000  # unit: mm
+            x = nav_map_grid.center.x + nav_map_grid.size / 2. - row_ix * grid_map.info.resolution * 1000  # unit: mm
+            y = nav_map_grid.center.y + nav_map_grid.size / 2. - col_ix * grid_map.info.resolution * 1000  # unit: mm
             return x, y  # unit: mm
 
         np_array = np.zeros((height, width))
@@ -81,8 +81,8 @@ class NavMap(object):
                     value = float(num)
                 else:
                     value = float(num.value)
-                # np_array[i, j] = float(value)
-                np_array[i, j] = float(i)
+                np_array[i, j] = float(value)
+                # np_array[i, j] = float(i)
         # for some reason, if we set row_index to dim[0].label, visualizer complains.
         # thus, we first transpose np_array
         data = self._numpy_to_multiarray(np_array.transpose())
