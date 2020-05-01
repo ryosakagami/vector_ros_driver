@@ -40,10 +40,6 @@ class NavMap(object):
             self.grid_map_publisher.publish(grid_map)
             self.rate.sleep()
 
-    # def _on_nav_map_update(self, _robot, _event_type, msg):
-    #     grid_map = self.nav_map_grid_to_grid_map(msg)
-    #     self.grid_map_publisher.publish(grid_map)
-
     def nav_map_grid_to_grid_map(self, nav_map_grid):
         grid_map = GridMap()
         grid_map.layers = ['nav_map']
@@ -78,65 +74,29 @@ class NavMap(object):
         dstride1 = data.layout.dim[1].stride
         offset = data.layout.data_offset
 
-        def _center_to_indices(center, half_size):
-            x_cen = (nav_map_grid.size / 2. + (center.x - nav_map_grid.center.x)) / 1000.  # unit: m
-            x_min = x_cen - half_size / 1000.
-            x_max = x_cen + half_size / 1000.
-            y_cen = (nav_map_grid.size / 2. - (center.y - nav_map_grid.center.y)) / 1000.  # unit: m
-            y_min = y_cen - half_size / 1000.
-            y_max = y_cen + half_size / 1000.
-            try:
-                assert x_min >= 0 and x_max <= grid_map.info.length_x \
-                    and y_min >= 0 and y_max <= grid_map.info.length_y
-            except AssertionError as e:
-                print("x_min: {} or x_max: {} or y_min: {} or y_max: {} is outside of nav_map".format(x_min, x_max, y_min, y_max))
-                print("Points out of map will be ignored")
-            column_index_min = int(x_min / grid_map.info.resolution)
-            column_index_max = int(x_max / grid_map.info.resolution)
-            row_index_min = int(y_min / grid_map.info.resolution)
-            row_index_max = int(y_max / grid_map.info.resolution)
-            if column_index_min < 0:
-                column_index_min = 0
-                print("Set column_index_min = 0")
-            if column_index_max > width:
-                column_index_max = width
-                print("Set column_index_max = {}".format(width))
-            if row_index_min < 0:
-                row_index_min = 0
-                print("Set row_index_min = 0")
-            if row_index_max > height:
-                row_index_max = height
-                print("Set row_index_max = {}".format(height))
-            return list(range(row_index_min, row_index_max)), list(range(column_index_min, column_index_max))
+        def _index_to_pose(row_ix, col_ix):
+            x = nav_map_grid.center.x - nav_map_grid.size + row_ix * grid_map.info.resolution  # unit: mm
+            y = nav_map_grid.center.x + nav_map_grid.size - row_ix * grid_map.info.resolution  # unit: mm
+            return x, y
 
-        def _recursive_draw(grid_node: anki_vector.nav_map.NavMapGridNode):
-            if grid_node.children is not None:
-                for child in grid_node.children:
-                    _recursive_draw(child)
-            else:
-                # leaf node
-                cen = grid_node.center
-                half_size = grid_node.size * 0.5
-                row_indices, column_indices = _center_to_indices(cen, half_size)
-                for row_index in row_indices:
-                    for column_index in column_indices:
-                        try:
-                            data.data[offset + row_index + dstride1 * column_index] = float(grid_node.content)
-                        except IndexError:
-                            print("row_index {} or column_index {} is out of range".format(row_index, column_index))
-                            print("len(data.data) is {}, but offset + row_index + dstride1 * column_index is {}".format(len(data.data), offset + row_index + dstride1 * column_index))
-
-        _recursive_draw(nav_map_grid.root_node)
+        # tmpmat = np.zeros((height, width))
+        # for i in range(height):
+        #     for j in range(width):
+        #         # x, y = _index_to_pose(i, j)
+        #         # num = nav_map_grid.get_content(x, y)
+        #         # data.data[offset + i + dstride1*j] = float(num.value)
+        #         # tmpmat[i, j] = float(num.value)
+        #         num = random.randrange(0,8)
+        #         data.data[offset + i + dstride1*j] = num
+        #         tmpmat[i, j] = num
 
         # Dummy data for test
-        """
         tmpmat = np.zeros((height, width))
         for i in range(height):
             for j in range(width):
                 num = random.randrange(0,8)
                 data.data[offset + i + dstride1*j] = num
                 tmpmat[i, j] = num
-        """
 
         grid_map.data.append(data)
 
