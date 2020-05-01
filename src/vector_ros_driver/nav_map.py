@@ -58,14 +58,14 @@ class NavMap(object):
         data = Float32MultiArray()
         data.layout.dim.append(MultiArrayDimension())
         data.layout.dim.append(MultiArrayDimension())
-        data.layout.dim[0].label = "column_index"  # height
-        data.layout.dim[1].label = "row_index"  # width
-        height = int(grid_map.info.length_y / grid_map.info.resolution)
-        width = int(grid_map.info.length_x / grid_map.info.resolution)
-        data.layout.dim[0].size = height
-        data.layout.dim[1].size = width
+        data.layout.dim[0].label = "column_index"  # width
+        data.layout.dim[1].label = "row_index"  # height
+        height = int(grid_map.info.length_x / grid_map.info.resolution)
+        width = int(grid_map.info.length_y / grid_map.info.resolution)
+        data.layout.dim[0].size = width
+        data.layout.dim[1].size = height
         data.layout.dim[0].stride = height * width
-        data.layout.dim[1].stride = width
+        data.layout.dim[1].stride = height
         data.layout.data_offset = 0
         data.data = [NavNodeContentTypes.Unknown] * height * width
 
@@ -75,9 +75,9 @@ class NavMap(object):
         offset = data.layout.data_offset
 
         def _index_to_pose(row_ix, col_ix):
-            x = nav_map_grid.center.x - nav_map_grid.size + row_ix * grid_map.info.resolution  # unit: mm
-            y = nav_map_grid.center.x + nav_map_grid.size - row_ix * grid_map.info.resolution  # unit: mm
-            return x, y
+            x = nav_map_grid.center.x - nav_map_grid.size + row_ix * grid_map.info.resolution * 1000  # unit: mm
+            y = nav_map_grid.center.x + nav_map_grid.size - row_ix * grid_map.info.resolution * 1000  # unit: mm
+            return x, y  # unit: mm
 
         # tmpmat = np.zeros((height, width))
         # for i in range(height):
@@ -95,7 +95,7 @@ class NavMap(object):
         for i in range(height):
             for j in range(width):
                 num = random.randrange(0,8)
-                data.data[offset + i + dstride1*j] = num
+                data.data[offset + i + dstride1 * j] = num
                 tmpmat[i, j] = num
 
         grid_map.data.append(data)
