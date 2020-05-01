@@ -40,9 +40,9 @@ class NavMap(object):
             self.grid_map_publisher.publish(grid_map)
             self.rate.sleep()
 
-    def _on_nav_map_update(self, _robot, _event_type, msg):
-        grid_map = self.nav_map_grid_to_grid_map(msg)
-        self.grid_map_publisher.publish(grid_map)
+    # def _on_nav_map_update(self, _robot, _event_type, msg):
+    #     grid_map = self.nav_map_grid_to_grid_map(msg)
+    #     self.grid_map_publisher.publish(grid_map)
 
     def nav_map_grid_to_grid_map(self, nav_map_grid):
         grid_map = GridMap()
@@ -74,48 +74,70 @@ class NavMap(object):
         data.data = [NavNodeContentTypes.Unknown] * height * width
 
         # Fill in data
-        # TODO: implement here, borrowing codes from vector sdk
-        """
-        def _recursive_draw(grid_node: nav_map.NavMapGridNode):
+        dstride0 = data.layout.dim[0].stride
+        dstride1 = data.layout.dim[1].stride
+        offset = data.layout.data_offset
+
+        def _center_to_indices(center, half_size):
+            x_cen = (nav_map_grid.size / 2. + (center.x - nav_map_grid.center.x)) / 1000.  # unit: m
+            x_min = x_cen - half_size / 1000.
+            x_max = x_cen + half_size / 1000.
+            y_cen = (nav_map_grid.size / 2. - (center.y - nav_map_grid.center.y)) / 1000.  # unit: m
+            y_min = y_cen - half_size / 1000.
+            y_max = y_cen + half_size / 1000.
+            try:
+                assert x_min >= 0 and x_max <= grid_map.info.length_x \
+                    and y_min >= 0 and y_max <= grid_map.info.length_y
+            except AssertionError as e:
+                print("x_min: {} or x_max: {} or y_min: {} or y_max: {} is outside of nav_map".format(x_min, x_max, y_min, y_max))
+                print("Points out of map will be ignored")
+            column_index_min = int(x_min / grid_map.info.resolution)
+            column_index_max = int(x_max / grid_map.info.resolution)
+            row_index_min = int(y_min / grid_map.info.resolution)
+            row_index_max = int(y_max / grid_map.info.resolution)
+            if column_index_min < 0:
+                column_index_min = 0
+                print("Set column_index_min = 0")
+            if column_index_max > width:
+                column_index_max = width
+                print("Set column_index_max = {}".format(width))
+            if row_index_min < 0:
+                row_index_min = 0
+                print("Set row_index_min = 0")
+            if row_index_max > height:
+                row_index_max = height
+                print("Set row_index_max = {}".format(height))
+            return list(range(row_index_min, row_index_max)), list(range(column_index_min, column_index_max))
+
+        def _recursive_draw(grid_node: anki_vector.nav_map.NavMapGridNode):
             if grid_node.children is not None:
                 for child in grid_node.children:
                     _recursive_draw(child)
             else:
-                # leaf node - render as a quad
-                map_alpha = 0.5
+                # leaf node
                 cen = grid_node.center
                 half_size = grid_node.size * 0.5
+                row_indices, column_indices = _center_to_indices(cen, half_size)
+                for row_index in row_indices:
+                    for column_index in column_indices:
+                        try:
+                            data.data[offset + row_index + dstride1 * column_index] = float(grid_node.content)
+                        except IndexError:
+                            print("row_index {} or column_index {} is out of range".format(row_index, column_index))
+                            print("len(data.data) is {}, but offset + row_index + dstride1 * column_index is {}".format(len(data.data), offset + row_index + dstride1 * column_index))
 
-                # Draw outline
-                glColor4f(*color_light_gray, 1.0)  # fully opaque
-                glBegin(GL_LINE_STRIP)
-                glVertex3f(cen.x + half_size, cen.y + half_size, cen.z)
-                glVertex3f(cen.x + half_size, cen.y - half_size, cen.z)
-                glVertex3f(cen.x - half_size, cen.y - half_size, cen.z)
-                glVertex3f(cen.x - half_size, cen.y + half_size, cen.z)
-                glVertex3f(cen.x + half_size, cen.y + half_size, cen.z)
-                glEnd()
+        _recursive_draw(nav_map_grid.root_node)
 
-                # Draw filled contents
-                glColor4f(*color_for_content(grid_node.content), map_alpha)
-                glBegin(GL_TRIANGLE_STRIP)
-                glVertex3f(cen.x + half_size, cen.y - half_size, fill_z)
-                glVertex3f(cen.x + half_size, cen.y + half_size, fill_z)
-                glVertex3f(cen.x - half_size, cen.y - half_size, fill_z)
-                glVertex3f(cen.x - half_size, cen.y + half_size, fill_z)
-                glEnd()
-
-        _recursive_draw(new_nav_map.root_node)
+        # Dummy data for test
         """
-        dstride0 = data.layout.dim[0].stride
-        dstride1 = data.layout.dim[1].stride
-        offset = data.layout.data_offset
         tmpmat = np.zeros((height, width))
         for i in range(height):
             for j in range(width):
                 num = random.randrange(0,8)
                 data.data[offset + i + dstride1*j] = num
                 tmpmat[i, j] = num
+        """
+
         grid_map.data.append(data)
 
         # Return grid map
