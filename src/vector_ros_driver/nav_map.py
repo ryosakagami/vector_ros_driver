@@ -21,10 +21,13 @@ class NavMap(object):
         self.grid_map_publisher = rospy.Publisher("~grid_map", GridMap, queue_size=1)
 
         # Subscribers
-        # self.async_robot.events.subscribe(self._on_nav_map_update, Events.nav_map_update)
+        self.async_robot.events.subscribe(self._on_nav_map_update, Events.nav_map_update)
 
         # Start publishing NavMap topic
         self.publish_nav_map()
+
+    def _on_nav_map_update(self, _robot, _event_type, msg):
+        print("NavMap is updated!")
 
     # This function is attributed to
     # https://github.com/neka-nat/ros_np_multiarray/blob/master/src/ros_np_multiarray/ros_np_multiarray.py

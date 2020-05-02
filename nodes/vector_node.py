@@ -49,7 +49,7 @@ if __name__=="__main__":
         main(async_robot)
 
     else:
-        with anki_vector.AsyncRobot() as async_robot:
+        with anki_vector.AsyncRobot(enable_nav_map_feed=True) as async_robot:
             async_robot.camera.init_camera_feed()
             async_robot.nav_map.init_nav_map_feed()
             main(async_robot)
